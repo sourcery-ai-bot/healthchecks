@@ -15,7 +15,7 @@ class UnsubscribeEmailTestCase(BaseTestCase):
 
     def test_it_serves_confirmation_form(self):
         token = self.channel.make_token()
-        url = "/integrations/%s/unsub/%s/" % (self.channel.code, token)
+        url = f"/integrations/{self.channel.code}/unsub/{token}/"
 
         r = self.client.get(url)
         self.assertContains(r, "Please press the button below")
@@ -23,7 +23,7 @@ class UnsubscribeEmailTestCase(BaseTestCase):
 
     def test_post_unsubscribes(self):
         token = self.channel.make_token()
-        url = "/integrations/%s/unsub/%s/" % (self.channel.code, token)
+        url = f"/integrations/{self.channel.code}/unsub/{token}/"
 
         r = self.client.post(url)
         self.assertContains(r, "has been unsubscribed", status_code=200)
@@ -35,7 +35,7 @@ class UnsubscribeEmailTestCase(BaseTestCase):
         signer = TimestampSigner(salt="alerts")
         signed_token = signer.sign(self.channel.make_token())
 
-        url = "/integrations/%s/unsub/%s/" % (self.channel.code, signed_token)
+        url = f"/integrations/{self.channel.code}/unsub/{signed_token}/"
 
         r = self.client.get(url)
         self.assertContains(
@@ -49,7 +49,7 @@ class UnsubscribeEmailTestCase(BaseTestCase):
             signer = TimestampSigner(salt="alerts")
             signed_token = signer.sign(self.channel.make_token())
 
-        url = "/integrations/%s/unsub/%s/" % (self.channel.code, signed_token)
+        url = f"/integrations/{self.channel.code}/unsub/{signed_token}/"
 
         r = self.client.get(url)
         self.assertContains(
@@ -58,14 +58,14 @@ class UnsubscribeEmailTestCase(BaseTestCase):
         self.assertContains(r, "submit()", status_code=200)
 
     def test_it_checks_signature(self):
-        signed_token = self.channel.make_token() + ":bad:signature"
-        url = "/integrations/%s/unsub/%s/" % (self.channel.code, signed_token)
+        signed_token = f"{self.channel.make_token()}:bad:signature"
+        url = f"/integrations/{self.channel.code}/unsub/{signed_token}/"
 
         r = self.client.get(url)
         self.assertContains(r, "link you just used is incorrect", status_code=200)
 
     def test_it_checks_token(self):
-        url = "/integrations/%s/unsub/faketoken/" % self.channel.code
+        url = f"/integrations/{self.channel.code}/unsub/faketoken/"
 
         r = self.client.get(url)
         self.assertContains(r, "link you just used is incorrect", status_code=200)
@@ -75,7 +75,7 @@ class UnsubscribeEmailTestCase(BaseTestCase):
         self.channel.save()
 
         token = self.channel.make_token()
-        url = "/integrations/%s/unsub/%s/" % (self.channel.code, token)
+        url = f"/integrations/{self.channel.code}/unsub/{token}/"
 
         r = self.client.get(url)
         self.assertEqual(r.status_code, 404)

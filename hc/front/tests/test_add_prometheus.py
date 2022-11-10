@@ -5,7 +5,7 @@ from hc.test import BaseTestCase
 class AddPrometheusTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_prometheus/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_prometheus/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

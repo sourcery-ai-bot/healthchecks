@@ -10,7 +10,7 @@ from hc.test import BaseTestCase
 class AddEmailTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_email/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_email/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

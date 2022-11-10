@@ -6,7 +6,7 @@ from hc.test import BaseTestCase
 class AddPdcCompleteTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_pdc/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_pdc/"
         self.url += "XXXXXXXXXXXX/?service_key=123"
 
     def test_it_validates_code(self):

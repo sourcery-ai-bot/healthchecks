@@ -6,8 +6,8 @@ class RemoveCheckTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.check = Check.objects.create(project=self.project)
-        self.remove_url = "/checks/%s/remove/" % self.check.code
-        self.redirect_url = "/projects/%s/checks/" % self.project.code
+        self.remove_url = f"/checks/{self.check.code}/remove/"
+        self.redirect_url = f"/projects/{self.project.code}/checks/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")

@@ -20,14 +20,14 @@ class AddTelegramTestCase(BaseTestCase):
         payload = signing.dumps((123, "group", "My Group"))
 
         self.client.login(username="alice@example.org", password="password")
-        r = self.client.get(self.url + "?" + payload)
+        r = self.client.get(f"{self.url}?{payload}")
         self.assertEqual(r.status_code, 404)
 
     def test_it_shows_confirmation(self):
         payload = signing.dumps((123, "group", "My Group"))
 
         self.client.login(username="alice@example.org", password="password")
-        r = self.client.get(self.url + "?" + payload)
+        r = self.client.get(f"{self.url}?{payload}")
         self.assertContains(r, "My Group")
 
     def test_it_works(self):
@@ -35,7 +35,7 @@ class AddTelegramTestCase(BaseTestCase):
 
         self.client.login(username="alice@example.org", password="password")
         form = {"project": str(self.project.code)}
-        r = self.client.post(self.url + "?" + payload, form)
+        r = self.client.post(f"{self.url}?{payload}", form)
         self.assertRedirects(r, self.channels_url)
 
         c = Channel.objects.get()
@@ -47,7 +47,7 @@ class AddTelegramTestCase(BaseTestCase):
 
     def test_it_handles_bad_signature(self):
         self.client.login(username="alice@example.org", password="password")
-        r = self.client.get(self.url + "?bad-signature")
+        r = self.client.get(f"{self.url}?bad-signature")
         self.assertContains(r, "Incorrect Link")
 
         self.assertFalse(Channel.objects.exists())
@@ -69,15 +69,18 @@ class AddTelegramTestCase(BaseTestCase):
 
     @patch("hc.api.transports.requests.request")
     def test_bot_handles_bad_message(self, mock_get):
-        samples = ["", "{}"]
+        samples = [
+            "",
+            "{}",
+            {"message": {"chat": {"id": 123, "type": "group"}}},
+            {
+                "message": {
+                    "chat": {"id": 123, "type": "invalid"},
+                    "text": "/start",
+                }
+            },
+        ]
 
-        # text is missing
-        samples.append({"message": {"chat": {"id": 123, "type": "group"}}})
-
-        # bad chat type
-        samples.append(
-            {"message": {"chat": {"id": 123, "type": "invalid"}, "text": "/start"}}
-        )
 
         for sample in samples:
             r = self.client.post(
@@ -99,5 +102,5 @@ class AddTelegramTestCase(BaseTestCase):
 
         self.client.login(username="bob@example.org", password="password")
         form = {"project": str(self.project.code)}
-        r = self.client.post(self.url + "?" + payload, form)
+        r = self.client.post(f"{self.url}?{payload}", form)
         self.assertEqual(r.status_code, 403)

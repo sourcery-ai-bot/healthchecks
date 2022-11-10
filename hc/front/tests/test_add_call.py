@@ -7,7 +7,7 @@ from hc.test import BaseTestCase
 class AddCallTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_call/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_call/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

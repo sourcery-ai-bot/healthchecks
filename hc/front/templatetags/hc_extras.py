@@ -134,9 +134,9 @@ def down_title(check):
 
     """
 
-    s = "%s – %s" % (check.name_then_code(), settings.SITE_NAME)
+    s = f"{check.name_then_code()} – {settings.SITE_NAME}"
     if check.get_status() == "down":
-        s = "DOWN – " + s
+        s = f"DOWN – {s}"
 
     return s
 
@@ -160,7 +160,7 @@ def fix_asterisks(s):
 
 @register.filter
 def format_headers(headers):
-    return "\n".join("%s: %s" % (k, v) for k, v in headers.items())
+    return "\n".join(f"{k}: {v}" for k, v in headers.items())
 
 
 @register.simple_tag

@@ -124,7 +124,7 @@ class AddPushoverForm(forms.Form):
         key = self.cleaned_data["pushover_user_key"]
         prio = self.cleaned_data["prio"]
         prio_up = self.cleaned_data["prio_up"]
-        return "%s|%s|%s" % (key, prio, prio_up)
+        return f"{key}|{prio}|{prio_up}"
 
 
 class AddEmailForm(forms.Form):
@@ -175,9 +175,8 @@ class WebhookForm(forms.Form):
         url_down = self.cleaned_data.get("url_down")
         url_up = self.cleaned_data.get("url_up")
 
-        if not url_down and not url_up:
-            if not self.has_error("url_down"):
-                self.add_error("url_down", "Enter a valid URL.")
+        if not url_down and not url_up and not self.has_error("url_down"):
+            self.add_error("url_down", "Enter a valid URL.")
 
     def get_value(self):
         return json.dumps(dict(self.cleaned_data), sort_keys=True)
@@ -239,7 +238,7 @@ class AddMatrixForm(forms.Form):
 
         # validate it by trying to join
         url = settings.MATRIX_HOMESERVER
-        url += "/_matrix/client/r0/join/%s?" % quote(v)
+        url += f"/_matrix/client/r0/join/{quote(v)}?"
         url += urlencode({"access_token": settings.MATRIX_ACCESS_TOKEN})
         r = requests.post(url, {})
         if r.status_code == 429:
@@ -250,7 +249,7 @@ class AddMatrixForm(forms.Form):
 
         doc = r.json()
         if "error" in doc:
-            raise forms.ValidationError("Response from Matrix: %s" % doc["error"])
+            raise forms.ValidationError(f'Response from Matrix: {doc["error"]}')
 
         self.cleaned_data["room_id"] = doc["room_id"]
 

@@ -55,8 +55,7 @@ def ping(request, code, action="success", exitstatus=None):
 
 
 def _lookup(project, spec):
-    unique_fields = spec.get("unique", [])
-    if unique_fields:
+    if unique_fields := spec.get("unique", []):
         existing_checks = Check.objects.filter(project=project)
         if "name" in unique_fields:
             existing_checks = existing_checks.filter(name=spec.get("name"))
@@ -93,10 +92,10 @@ def _update(check, spec):
                 raise BadChannelException("empty channel identifier")
 
             matches = [c for c in available if str(c.code) == s or c.name == s]
-            if len(matches) == 0:
-                raise BadChannelException("invalid channel identifier: %s" % s)
+            if not matches:
+                raise BadChannelException(f"invalid channel identifier: {s}")
             elif len(matches) > 1:
-                raise BadChannelException("non-unique channel identifier: %s" % s)
+                raise BadChannelException(f"non-unique channel identifier: {s}")
 
             new_channels.add(matches[0])
 
@@ -139,11 +138,12 @@ def _update(check, spec):
             check.grace = new_grace
             need_save = True
 
-    if "schedule" in spec:
-        if check.kind != "cron" or check.schedule != spec["schedule"]:
-            check.kind = "cron"
-            check.schedule = spec["schedule"]
-            need_save = True
+    if "schedule" in spec and (
+        check.kind != "cron" or check.schedule != spec["schedule"]
+    ):
+        check.kind = "cron"
+        check.schedule = spec["schedule"]
+        need_save = True
 
     if "tz" in spec and check.tz != spec["tz"]:
         check.tz = spec["tz"]
@@ -173,11 +173,11 @@ def get_checks(request):
         # approximate filtering by tags
         q = q.filter(tags__contains=tag)
 
-    checks = []
-    for check in q:
-        # precise, final filtering
-        if not tags or check.matches_tag_set(tags):
-            checks.append(check.to_dict(readonly=request.readonly))
+    checks = [
+        check.to_dict(readonly=request.readonly)
+        for check in q
+        if not tags or check.matches_tag_set(tags)
+    ]
 
     return JsonResponse({"checks": checks})
 
@@ -379,10 +379,7 @@ def badge(request, badge_key, signature, tag, fmt):
     if fmt not in ("svg", "json", "shields"):
         return HttpResponseNotFound()
 
-    with_late = True
-    if len(signature) == 10 and signature.endswith("-2"):
-        with_late = False
-
+    with_late = len(signature) != 10 or not signature.endswith("-2")
     if not check_signature(badge_key, tag, signature):
         return HttpResponseNotFound()
 
@@ -458,7 +455,7 @@ def notification_status(request, code):
 
     # Handle "CallStatus" key from Twilio
     if request.POST.get("CallStatus") == "failed":
-        error = f"Delivery failed (status=failed)."
+        error = "Delivery failed (status=failed)."
 
     if error:
         notification.error = error

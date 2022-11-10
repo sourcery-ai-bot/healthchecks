@@ -26,7 +26,7 @@ class GetFlipsTestCase(BaseTestCase):
             new_status="up",
         )
 
-        self.url = "/api/v1/checks/%s/flips/" % self.a1.code
+        self.url = f"/api/v1/checks/{self.a1.code}/flips/"
 
     def get(self, api_key="X" * 32, qs=""):
         return self.client.get(self.url + qs, HTTP_X_API_KEY=api_key)

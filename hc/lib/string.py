@@ -28,7 +28,7 @@ def replace(template, ctx):
 
     result = [parts.pop(0)]
     for part in parts:
-        part = "$" + part
+        part = f"${part}"
         for placeholder, value in ctx.items():
             if part.startswith(placeholder):
                 part = part.replace(placeholder, value, 1)

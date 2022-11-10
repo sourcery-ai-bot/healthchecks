@@ -27,10 +27,10 @@ class Command(BaseCommand):
             if not doc.endswith(".md"):
                 continue
 
-            print("Rendering %s" % doc)
+            print(f"Rendering {doc}")
 
             src_path = os.path.join(docs_path, doc)
-            dst_path = os.path.join(docs_path, doc[:-3] + ".html")
+            dst_path = os.path.join(docs_path, f"{doc[:-3]}.html")
 
             text = open(src_path, "r", encoding="utf-8").read()
             html = markdown.markdown(text, extensions=extensions, extension_configs=ec)

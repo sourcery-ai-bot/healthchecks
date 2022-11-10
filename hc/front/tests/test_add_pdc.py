@@ -7,7 +7,7 @@ from hc.test import BaseTestCase
 class AddPdConnectTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_pdc/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_pdc/"
 
     def test_it_works(self):
         session = self.client.session
@@ -15,7 +15,7 @@ class AddPdConnectTestCase(BaseTestCase):
         session.save()
 
         self.client.login(username="alice@example.org", password="password")
-        url = self.url + "1234567890AB/?service_key=123"
+        url = f"{self.url}1234567890AB/?service_key=123"
         r = self.client.get(url, follow=True)
         self.assertRedirects(r, self.channels_url)
 

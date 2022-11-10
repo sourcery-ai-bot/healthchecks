@@ -51,7 +51,7 @@ class BaseTestCase(TestCase):
         self.charlies_profile = Profile(user=self.charlie)
         self.charlies_profile.save()
 
-        self.channels_url = "/projects/%s/integrations/" % self.project.code
+        self.channels_url = f"/projects/{self.project.code}/integrations/"
 
     def set_sudo_flag(self):
         session = self.client.session

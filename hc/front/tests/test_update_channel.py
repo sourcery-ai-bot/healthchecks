@@ -10,7 +10,7 @@ class UpdateChannelTestCase(BaseTestCase):
         self.channel = Channel.objects.create(project=self.project, kind="email")
 
     def test_it_works(self):
-        payload = {"channel": self.channel.code, "check-%s" % self.check.code: True}
+        payload = {"channel": self.channel.code, f"check-{self.check.code}": True}
 
         self.client.login(username="alice@example.org", password="password")
         r = self.client.post(self.channels_url, data=payload)
@@ -22,7 +22,7 @@ class UpdateChannelTestCase(BaseTestCase):
         assert checks[0].code == self.check.code
 
     def test_team_access_works(self):
-        payload = {"channel": self.channel.code, "check-%s" % self.check.code: True}
+        payload = {"channel": self.channel.code, f"check-{self.check.code}": True}
 
         # Logging in as bob, not alice. Bob has team access so this
         # should work.
@@ -45,7 +45,7 @@ class UpdateChannelTestCase(BaseTestCase):
         charlies_channel.email = "charlie@example.org"
         charlies_channel.save()
 
-        payload = {"channel": charlies_channel.code, "check-%s" % self.check.code: True}
+        payload = {"channel": charlies_channel.code, f"check-{self.check.code}": True}
         self.client.login(username="charlie@example.org", password="password")
         r = self.client.post(self.channels_url, data=payload)
 

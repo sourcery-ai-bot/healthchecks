@@ -90,7 +90,7 @@ class LoginWebAuthnTestCase(BaseTestCase):
             "signature": "e30=",
         }
 
-        url = self.url + "?next=" + self.channels_url
+        url = f"{self.url}?next={self.channels_url}"
         r = self.client.post(url, payload)
         self.assertRedirects(r, self.channels_url)
 

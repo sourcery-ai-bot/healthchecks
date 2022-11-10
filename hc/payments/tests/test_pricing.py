@@ -26,7 +26,7 @@ class PricingTestCase(BaseTestCase):
     def test_authenticated_for_project(self):
         self.client.login(username="alice@example.org", password="password")
 
-        r = self.client.get("/projects/%s/pricing/" % self.project.code)
+        r = self.client.get(f"/projects/{self.project.code}/pricing/")
         self.assertContains(r, "Unlimited Team Members", status_code=200)
         self.assertContains(r, "jumbotron")
 
@@ -41,7 +41,7 @@ class PricingTestCase(BaseTestCase):
     def test_it_offers_to_switch(self):
         self.client.login(username="bob@example.org", password="password")
 
-        r = self.client.get("/projects/%s/pricing/" % self.project.code)
+        r = self.client.get(f"/projects/{self.project.code}/pricing/")
         self.assertContains(r, "To manage billing for this project")
 
     def test_it_shows_active_plan(self):
@@ -56,5 +56,5 @@ class PricingTestCase(BaseTestCase):
         r = self.client.get("/pricing/")
         self.assertContains(r, "Business ($20 / month)", status_code=200)
 
-        r = self.client.get("/projects/%s/pricing/" % self.project.code)
+        r = self.client.get(f"/projects/{self.project.code}/pricing/")
         self.assertContains(r, "Business ($20 / month)", status_code=200)

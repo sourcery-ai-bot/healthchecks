@@ -7,8 +7,8 @@ class UpdateNameTestCase(BaseTestCase):
         super().setUp()
         self.check = Check.objects.create(project=self.project)
 
-        self.url = "/checks/%s/name/" % self.check.code
-        self.redirect_url = "/projects/%s/checks/" % self.project.code
+        self.url = f"/checks/{self.check.code}/name/"
+        self.redirect_url = f"/projects/{self.project.code}/checks/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")

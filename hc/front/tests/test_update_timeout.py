@@ -12,8 +12,8 @@ class UpdateTimeoutTestCase(BaseTestCase):
         self.check.last_ping = timezone.now()
         self.check.save()
 
-        self.url = "/checks/%s/timeout/" % self.check.code
-        self.redirect_url = "/projects/%s/checks/" % self.project.code
+        self.url = f"/checks/{self.check.code}/timeout/"
+        self.redirect_url = f"/projects/{self.project.code}/checks/"
 
     def test_it_works(self):
         payload = {"kind": "simple", "timeout": 3600, "grace": 60}

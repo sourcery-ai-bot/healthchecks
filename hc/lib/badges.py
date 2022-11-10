@@ -74,10 +74,7 @@ COLORS = {"up": "#4c1", "late": "#fe7d37", "down": "#e05d44"}
 
 
 def get_width(s):
-    total = 0
-    for c in s:
-        total += WIDTHS.get(c, 7)
-    return total
+    return sum(WIDTHS.get(c, 7) for c in s)
 
 
 def get_badge_svg(tag, status):

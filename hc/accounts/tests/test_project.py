@@ -11,7 +11,7 @@ class ProjectTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.url = "/projects/%s/settings/" % self.project.code
+        self.url = f"/projects/{self.project.code}/settings/"
 
     def test_it_checks_access(self):
         self.client.login(username="charlie@example.org", password="password")
@@ -204,7 +204,7 @@ class ProjectTestCase(BaseTestCase):
     def test_it_checks_membership_when_removing_team_member(self):
         self.client.login(username="charlie@example.org", password="password")
 
-        url = "/projects/%s/settings/" % self.charlies_project.code
+        url = f"/projects/{self.charlies_project.code}/settings/"
         form = {"remove_team_member": "1", "email": "alice@example.org"}
         r = self.client.post(url, form)
         self.assertEqual(r.status_code, 400)
@@ -224,7 +224,7 @@ class ProjectTestCase(BaseTestCase):
 
         self.client.login(username="alice@example.org", password="password")
 
-        r = self.client.get("/projects/%s/settings/" % p2.code)
+        r = self.client.get(f"/projects/{p2.code}/settings/")
         self.assertContains(r, "Add Users from Other Teams")
         self.assertContains(r, "bob@example.org")
 

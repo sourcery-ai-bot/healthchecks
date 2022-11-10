@@ -16,7 +16,7 @@ class LogTestCase(BaseTestCase):
         ping.created = "2000-01-01T00:00:00+00:00"
         ping.save()
 
-        self.url = "/checks/%s/log/" % self.check.code
+        self.url = f"/checks/{self.check.code}/log/"
 
     def test_it_works(self):
 

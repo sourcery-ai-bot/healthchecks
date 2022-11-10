@@ -10,7 +10,7 @@ class MyChecksTestCase(BaseTestCase):
         self.check = Check(project=self.project, name="Alice Was Here")
         self.check.save()
 
-        self.url = "/projects/%s/checks/" % self.project.code
+        self.url = f"/projects/{self.project.code}/checks/"
 
     def test_it_works(self):
         for email in ("alice@example.org", "bob@example.org"):
@@ -85,14 +85,14 @@ class MyChecksTestCase(BaseTestCase):
 
     def test_it_saves_sort_field(self):
         self.client.login(username="alice@example.org", password="password")
-        self.client.get(self.url + "?sort=name")
+        self.client.get(f"{self.url}?sort=name")
 
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.sort, "name")
 
     def test_it_ignores_bad_sort_value(self):
         self.client.login(username="alice@example.org", password="password")
-        self.client.get(self.url + "?sort=invalid")
+        self.client.get(f"{self.url}?sort=invalid")
 
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.sort, "created")

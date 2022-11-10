@@ -6,7 +6,7 @@ from hc.test import BaseTestCase
 class AddWebhookTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_webhook/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_webhook/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

@@ -9,8 +9,9 @@ class DeleteCheckTestCase(BaseTestCase):
 
     def test_it_works(self):
         r = self.client.delete(
-            "/api/v1/checks/%s" % self.check.code, HTTP_X_API_KEY="X" * 32
+            f"/api/v1/checks/{self.check.code}", HTTP_X_API_KEY="X" * 32
         )
+
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r["Access-Control-Allow-Origin"], "*")
 
@@ -23,6 +24,6 @@ class DeleteCheckTestCase(BaseTestCase):
         self.assertEqual(r.status_code, 404)
 
     def test_it_handles_options(self):
-        r = self.client.options("/api/v1/checks/%s" % self.check.code)
+        r = self.client.options(f"/api/v1/checks/{self.check.code}")
         self.assertEqual(r.status_code, 204)
         self.assertIn("DELETE", r["Access-Control-Allow-Methods"])

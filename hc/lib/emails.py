@@ -18,7 +18,7 @@ class EmailThread(Thread):
         self.headers = headers
 
     def run(self):
-        for attempt in range(0, self.MAX_TRIES):
+        for attempt in range(self.MAX_TRIES):
             try:
                 msg = EmailMultiAlternatives(
                     self.subject, self.text, to=(self.to,), headers=self.headers
@@ -39,9 +39,9 @@ class EmailThread(Thread):
 def send(name, to, ctx, headers={}):
     ctx["SITE_ROOT"] = settings.SITE_ROOT
 
-    subject = render("emails/%s-subject.html" % name, ctx).strip()
-    text = render("emails/%s-body-text.html" % name, ctx)
-    html = render("emails/%s-body-html.html" % name, ctx)
+    subject = render(f"emails/{name}-subject.html", ctx).strip()
+    text = render(f"emails/{name}-body-text.html", ctx)
+    html = render(f"emails/{name}-body-html.html", ctx)
 
     t = EmailThread(subject, text, html, to, headers)
     if hasattr(settings, "BLOCKING_EMAILS"):

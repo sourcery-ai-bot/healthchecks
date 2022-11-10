@@ -13,7 +13,7 @@ class CopyCheckTestCase(BaseTestCase):
         self.check.manual_resume = True
         self.check.save()
 
-        self.copy_url = "/checks/%s/copy/" % self.check.code
+        self.copy_url = f"/checks/{self.check.code}/copy/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")

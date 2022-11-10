@@ -7,7 +7,7 @@ from hc.test import BaseTestCase
 class AddShellTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_shell/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_shell/"
 
     @override_settings(SHELL_ENABLED=False)
     def test_it_is_disabled_by_default(self):

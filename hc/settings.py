@@ -20,10 +20,7 @@ def envbool(s, default):
 
 def envint(s, default):
     v = os.getenv(s, default)
-    if v == "None":
-        return None
-
-    return int(v)
+    return None if v == "None" else int(v)
 
 
 SECRET_KEY = os.getenv("SECRET_KEY", "---")
@@ -36,7 +33,7 @@ USE_PAYMENTS = envbool("USE_PAYMENTS", "False")
 REGISTRATION_OPEN = envbool("REGISTRATION_OPEN", "True")
 VERSION = ""
 with open(os.path.join(BASE_DIR, "CHANGELOG.md"), encoding="utf-8") as f:
-    for line in f.readlines():
+    for line in f:
         if line.startswith("## v"):
             VERSION = line.split()[1]
             break
@@ -109,9 +106,10 @@ TEST_RUNNER = "hc.api.tests.CustomRunner"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.getenv("DB_NAME", BASE_DIR + "/hc.sqlite"),
+        "NAME": os.getenv("DB_NAME", f"{BASE_DIR}/hc.sqlite"),
     }
 }
+
 
 # You can switch database engine to postgres or mysql using environment
 # variable 'DB'. Travis CI does this.
@@ -155,7 +153,7 @@ LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 SITE_ROOT = os.getenv("SITE_ROOT", "http://localhost:8000")
 SITE_NAME = os.getenv("SITE_NAME", "Mychecks")
 MASTER_BADGE_LABEL = os.getenv("MASTER_BADGE_LABEL", SITE_NAME)
-PING_ENDPOINT = os.getenv("PING_ENDPOINT", SITE_ROOT + "/ping/")
+PING_ENDPOINT = os.getenv("PING_ENDPOINT", f"{SITE_ROOT}/ping/")
 PING_EMAIL_DOMAIN = os.getenv("PING_EMAIL_DOMAIN", "localhost")
 PING_BODY_LIMIT = envint("PING_BODY_LIMIT", "10000")
 STATIC_URL = "/static/"

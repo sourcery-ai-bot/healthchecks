@@ -19,20 +19,20 @@ class LoginTestCase(BaseTestCase):
 
         # And email should have been sent
         self.assertEqual(len(mail.outbox), 1)
-        subject = "Log in to %s" % settings.SITE_NAME
+        subject = f"Log in to {settings.SITE_NAME}"
         self.assertEqual(mail.outbox[0].subject, subject)
 
     def test_it_sends_link_with_next(self):
         form = {"identity": "alice@example.org"}
 
-        r = self.client.post("/accounts/login/?next=" + self.channels_url, form)
+        r = self.client.post(f"/accounts/login/?next={self.channels_url}", form)
         self.assertRedirects(r, "/accounts/login_link_sent/")
         self.assertIn("auto-login", r.cookies)
 
         # The check_token link should have a ?next= query parameter:
         self.assertEqual(len(mail.outbox), 1)
         body = mail.outbox[0].body
-        self.assertTrue("/?next=" + self.channels_url in body)
+        self.assertTrue(f"/?next={self.channels_url}" in body)
 
     @override_settings(SECRET_KEY="test-secret")
     def test_it_rate_limits_emails(self):
@@ -86,10 +86,10 @@ class LoginTestCase(BaseTestCase):
 
         form = {"action": "login", "email": "alice@example.org", "password": "password"}
 
-        samples = [self.channels_url, "/checks/%s/details/" % check.code]
+        samples = [self.channels_url, f"/checks/{check.code}/details/"]
 
         for s in samples:
-            r = self.client.post("/accounts/login/?next=%s" % s, form)
+            r = self.client.post(f"/accounts/login/?next={s}", form)
             self.assertRedirects(r, s)
 
     def test_it_handles_bad_next_parameter(self):

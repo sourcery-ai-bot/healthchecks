@@ -18,7 +18,7 @@ class DetailsTestCase(BaseTestCase):
         ping.created = "2000-01-01T00:00:00+00:00"
         ping.save()
 
-        self.url = "/checks/%s/details/" % self.check.code
+        self.url = f"/checks/{self.check.code}/details/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")
@@ -47,7 +47,7 @@ class DetailsTestCase(BaseTestCase):
 
     def test_it_shows_new_check_notice(self):
         self.client.login(username="alice@example.org", password="password")
-        r = self.client.get(self.url + "?new")
+        r = self.client.get(f"{self.url}?new")
         self.assertContains(r, "Your new check is ready!", status_code=200)
 
     def test_it_hides_actions_from_readonly_users(self):
@@ -105,7 +105,7 @@ class DetailsTestCase(BaseTestCase):
         self.check.save()
 
         r = self.client.get(self.url)
-        self.assertContains(r, f"* * * * * /your/command.sh")
+        self.assertContains(r, "* * * * * /your/command.sh")
         self.assertContains(r, 'FIXME: replace "* * * * *"')
 
     @patch("hc.lib.date.timezone.now")

@@ -6,8 +6,8 @@ class ResumeTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.check = Check.objects.create(project=self.project, status="paused")
-        self.url = "/checks/%s/resume/" % self.check.code
-        self.redirect_url = "/checks/%s/details/" % self.check.code
+        self.url = f"/checks/{self.check.code}/resume/"
+        self.redirect_url = f"/checks/{self.check.code}/details/"
 
     def test_it_resumes(self):
         self.client.login(username="alice@example.org", password="password")

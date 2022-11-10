@@ -107,10 +107,7 @@ class Check(models.Model):
         return "%s (%d)" % (self.name or self.code, self.id)
 
     def name_then_code(self):
-        if self.name:
-            return self.name
-
-        return str(self.code)
+        return self.name or str(self.code)
 
     def url(self):
         return settings.PING_ENDPOINT + str(self.code)
@@ -119,7 +116,7 @@ class Check(models.Model):
         return settings.SITE_ROOT + reverse("hc-details", args=[self.code])
 
     def email(self):
-        return "%s@%s" % (self.code, settings.PING_EMAIL_DOMAIN)
+        return f"{self.code}@{settings.PING_EMAIL_DOMAIN}"
 
     def clamped_last_duration(self):
         if self.last_duration and self.last_duration < MAX_DELTA:
@@ -186,10 +183,7 @@ class Check(models.Model):
         if now >= grace_end:
             return "down"
 
-        if now >= grace_start:
-            return "grace"
-
-        return "up"
+        return "grace" if now >= grace_start else "up"
 
     def get_status_with_started(self):
         return self.get_status(with_started=True)
@@ -263,9 +257,7 @@ class Check(models.Model):
         if action == "start":
             self.last_start = now
             # Don't update "last_ping" field.
-        elif action == "ign":
-            pass
-        else:
+        elif action != "ign":
             self.last_ping = now
             if self.last_start:
                 self.last_duration = self.last_ping - self.last_start
@@ -389,18 +381,18 @@ class Channel(models.Model):
         if self.name:
             return self.name
         if self.kind == "email":
-            return "Email to %s" % self.email_value
-        elif self.kind == "sms":
-            return "SMS to %s" % self.phone_number
+            return f"Email to {self.email_value}"
         elif self.kind == "slack":
-            return "Slack %s" % self.slack_channel
+            return f"Slack {self.slack_channel}"
+        elif self.kind == "sms":
+            return f"SMS to {self.phone_number}"
         elif self.kind == "telegram":
-            return "Telegram %s" % self.telegram_name
+            return f"Telegram {self.telegram_name}"
         elif self.kind == "zulip":
             if self.zulip_type == "stream":
-                return "Zulip stream %s" % self.zulip_to
+                return f"Zulip stream {self.zulip_to}"
             if self.zulip_type == "private":
-                return "Zulip user %s" % self.zulip_to
+                return f"Zulip user {self.zulip_to}"
 
         return self.get_kind_display()
 
@@ -412,7 +404,7 @@ class Channel(models.Model):
         self.checks.add(*checks)
 
     def make_token(self):
-        seed = "%s%s" % (self.code, settings.SECRET_KEY)
+        seed = f"{self.code}{settings.SECRET_KEY}"
         seed = seed.encode()
         return hashlib.sha1(seed).hexdigest()
 
@@ -482,18 +474,14 @@ class Channel(models.Model):
         elif self.kind == "signal":
             return transports.Signal(self)
         else:
-            raise NotImplementedError("Unknown channel kind: %s" % self.kind)
+            raise NotImplementedError(f"Unknown channel kind: {self.kind}")
 
     def notify(self, check, is_test=False):
         if self.transport.is_noop(check):
             return "no-op"
 
         n = Notification(channel=self)
-        if is_test:
-            # When sending a test notification we leave the owner field null.
-            # (the passed check is a dummy, unsaved Check instance)
-            pass
-        else:
+        if not is_test:
             n.owner = check
 
         n.check_status = check.status
@@ -512,7 +500,7 @@ class Channel(models.Model):
         return error
 
     def icon_path(self):
-        return "img/integrations/%s.png" % self.kind
+        return f"img/integrations/{self.kind}.png"
 
     @property
     def json(self):
@@ -610,7 +598,7 @@ class Channel(models.Model):
         # Discord migrated to discord.com,
         # and is dropping support for discordapp.com on 7 November 2020
         if url.startswith("https://discordapp.com/"):
-            url = "https://discord.com/" + url[23:]
+            url = f"https://discord.com/{url[23:]}"
 
         return url
 
@@ -689,10 +677,7 @@ class Channel(models.Model):
     @property
     def email_value(self):
         assert self.kind == "email"
-        if not self.value.startswith("{"):
-            return self.value
-
-        return self.json["value"]
+        return self.json["value"] if self.value.startswith("{") else self.value
 
     @property
     def email_notify_up(self):
@@ -770,7 +755,7 @@ class Channel(models.Model):
         # Fallback if we don't have the site value:
         # derive it from bot's email
         _, domain = doc["bot_email"].split("@")
-        return "https://" + domain
+        return f"https://{domain}"
 
     @property
     def zulip_api_key(self):
@@ -854,7 +839,7 @@ class Flip(models.Model):
             return
 
         if self.new_status not in ("up", "down"):
-            raise NotImplementedError("Unexpected status: %s" % self.status)
+            raise NotImplementedError(f"Unexpected status: {self.status}")
 
         for channel in self.owner.channel_set.all():
             start = time.time()
@@ -899,10 +884,10 @@ class TokenBucket(models.Model):
         mailbox, domain = email.split("@")
         mailbox = mailbox.replace(".", "")
         mailbox = mailbox.split("+")[0]
-        email = mailbox + "@" + domain
+        email = f"{mailbox}@{domain}"
 
         salted_encoded = (email + settings.SECRET_KEY).encode()
-        value = "em-%s" % hashlib.sha1(salted_encoded).hexdigest()
+        value = f"em-{hashlib.sha1(salted_encoded).hexdigest()}"
 
         # 20 login attempts for a single email per hour:
         return TokenBucket.authorize(value, 20, 3600)
@@ -917,14 +902,14 @@ class TokenBucket(models.Model):
     @staticmethod
     def authorize_login_password(email):
         salted_encoded = (email + settings.SECRET_KEY).encode()
-        value = "pw-%s" % hashlib.sha1(salted_encoded).hexdigest()
+        value = f"pw-{hashlib.sha1(salted_encoded).hexdigest()}"
 
         # 20 password attempts per day
         return TokenBucket.authorize(value, 20, 3600 * 24)
 
     @staticmethod
     def authorize_telegram(telegram_id):
-        value = "tg-%s" % telegram_id
+        value = f"tg-{telegram_id}"
 
         # 6 messages for a single chat per minute:
         return TokenBucket.authorize(value, 6, 60)
@@ -932,7 +917,7 @@ class TokenBucket(models.Model):
     @staticmethod
     def authorize_signal(phone):
         salted_encoded = (phone + settings.SECRET_KEY).encode()
-        value = "signal-%s" % hashlib.sha1(salted_encoded).hexdigest()
+        value = f"signal-{hashlib.sha1(salted_encoded).hexdigest()}"
 
         # 6 messages for a single recipient per minute:
         return TokenBucket.authorize(value, 6, 60)
@@ -940,7 +925,7 @@ class TokenBucket(models.Model):
     @staticmethod
     def authorize_pushover(user_key):
         salted_encoded = (user_key + settings.SECRET_KEY).encode()
-        value = "po-%s" % hashlib.sha1(salted_encoded).hexdigest()
+        value = f"po-{hashlib.sha1(salted_encoded).hexdigest()}"
         # 6 messages for a single user key per minute:
         return TokenBucket.authorize(value, 6, 60)
 

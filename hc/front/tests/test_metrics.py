@@ -14,7 +14,7 @@ class MetricsTestCase(BaseTestCase):
         self.check.save()
 
         key = "R" * 32
-        self.url = "/projects/%s/checks/metrics/%s" % (self.project.code, key)
+        self.url = f"/projects/{self.project.code}/checks/metrics/{key}"
 
     def test_it_works(self):
         r = self.client.get(self.url)
@@ -35,11 +35,11 @@ class MetricsTestCase(BaseTestCase):
         self.assertContains(r, "A\\\\C")
 
     def test_it_checks_api_key_length(self):
-        r = self.client.get(self.url + "R")
+        r = self.client.get(f"{self.url}R")
         self.assertEqual(r.status_code, 400)
 
     def test_it_checks_api_key(self):
-        url = "/projects/%s/checks/metrics/%s" % (self.project.code, "X" * 32)
+        url = f'/projects/{self.project.code}/checks/metrics/{"X" * 32}'
         r = self.client.get(url)
         self.assertEqual(r.status_code, 403)
 

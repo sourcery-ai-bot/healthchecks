@@ -6,7 +6,7 @@ class BadgesTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.url = "/projects/%s/badges/" % self.project.code
+        self.url = f"/projects/{self.project.code}/badges/"
 
     def test_it_shows_badges(self):
         Check.objects.create(project=self.project, tags="foo a-B_1  baz@")

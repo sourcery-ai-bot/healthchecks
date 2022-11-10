@@ -82,7 +82,7 @@ class Command(BaseCommand):
             return True
 
         if profile.send_report(nag=True):
-            self.stdout.write("Sent nag to %s" % profile.user.email)
+            self.stdout.write(f"Sent nag to {profile.user.email}")
             # Pause before next report to avoid hitting sending quota
             self.pause()
         else:
@@ -106,7 +106,7 @@ class Command(BaseCommand):
                 break
 
             formatted = timezone.now().isoformat()
-            self.stdout.write("-- MARK %s --" % formatted)
+            self.stdout.write(f"-- MARK {formatted} --")
 
             # Sleep for 1 minute before looking for more work
             time.sleep(60)

@@ -17,16 +17,16 @@ class TokenBucketTestCase(BaseTestCase):
 
         obj = TokenBucket.objects.get()
         self.assertEqual(obj.tokens, 0.95)
-        self.assertEqual(obj.value, "em-" + ALICE_HASH)
+        self.assertEqual(obj.value, f"em-{ALICE_HASH}")
 
     def test_it_handles_insufficient_tokens(self):
-        TokenBucket.objects.create(value="em-" + ALICE_HASH, tokens=0.04)
+        TokenBucket.objects.create(value=f"em-{ALICE_HASH}", tokens=0.04)
 
         r = TokenBucket.authorize_login_email("alice@example.org")
         self.assertFalse(r)
 
     def test_it_tops_up(self):
-        obj = TokenBucket(value="em-" + ALICE_HASH)
+        obj = TokenBucket(value=f"em-{ALICE_HASH}")
         obj.tokens = 0
         obj.updated = now() - td(minutes=30)
         obj.save()

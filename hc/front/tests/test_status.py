@@ -9,7 +9,7 @@ class StatusTestCase(BaseTestCase):
         self.check.tags = "foo"
         self.check.save()
 
-        self.url = "/projects/%s/checks/status/" % self.project.code
+        self.url = f"/projects/{self.project.code}/checks/status/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")

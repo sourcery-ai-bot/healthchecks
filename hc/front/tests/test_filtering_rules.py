@@ -7,8 +7,8 @@ class FilteringRulesTestCase(BaseTestCase):
         super().setUp()
         self.check = Check.objects.create(project=self.project)
 
-        self.url = "/checks/%s/filtering_rules/" % self.check.code
-        self.redirect_url = "/checks/%s/details/" % self.check.code
+        self.url = f"/checks/{self.check.code}/filtering_rules/"
+        self.redirect_url = f"/checks/{self.check.code}/details/"
 
     def test_it_works(self):
         payload = {

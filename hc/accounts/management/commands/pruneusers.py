@@ -37,7 +37,7 @@ class Command(BaseCommand):
         q = q.exclude(user__last_login__gt=F("deletion_notice_date"))
 
         for profile in q:
-            self.stdout.write("Deleting inactive %s" % profile.user.email)
+            self.stdout.write(f"Deleting inactive {profile.user.email}")
             profile.user.delete()
 
         return "Done!"

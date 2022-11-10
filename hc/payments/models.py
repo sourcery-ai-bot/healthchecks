@@ -194,13 +194,14 @@ class Subscription(models.Model):
     @property
     def transactions(self):
         if not hasattr(self, "_tx"):
-            if not self.customer_id:
-                self._tx = []
-            else:
-                self._tx = list(
+            self._tx = (
+                list(
                     braintree.Transaction.search(
                         braintree.TransactionSearch.customer_id == self.customer_id
                     )
                 )
+                if self.customer_id
+                else []
+            )
 
         return self._tx

@@ -9,8 +9,8 @@ class PauseTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.check = Check.objects.create(project=self.project, status="up")
-        self.url = "/checks/%s/pause/" % self.check.code
-        self.redirect_url = "/checks/%s/details/" % self.check.code
+        self.url = f"/checks/{self.check.code}/pause/"
+        self.redirect_url = f"/checks/{self.check.code}/details/"
 
     def test_it_pauses(self):
         self.client.login(username="alice@example.org", password="password")

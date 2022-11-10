@@ -6,7 +6,7 @@ from hc.test import BaseTestCase
 class AddPagerTreeTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_pagertree/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_pagertree/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

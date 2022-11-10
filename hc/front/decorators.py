@@ -8,10 +8,11 @@ def require_setting(key):
     def decorator(f):
         @wraps(f)
         def wrapper(request, *args, **kwds):
-            if not getattr(settings, key):
-                return HttpResponse(status=404)
-
-            return f(request, *args, **kwds)
+            return (
+                f(request, *args, **kwds)
+                if getattr(settings, key)
+                else HttpResponse(status=404)
+            )
 
         return wrapper
 

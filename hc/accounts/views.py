@@ -115,7 +115,7 @@ def _check_2fa(request, user):
         path = reverse("hc-login-webauthn")
         redirect_url = request.GET.get("next")
         if _allow_redirect(redirect_url):
-            path += "?next=%s" % redirect_url
+            path += f"?next={redirect_url}"
 
         return redirect(path)
 
@@ -555,18 +555,18 @@ def unsubscribe_reports(request, signed_username):
 def close(request):
     user = request.user
 
-    if request.method == "POST":
-        if request.POST.get("confirmation") == request.user.email:
-            # Cancel their subscription:
-            sub = Subscription.objects.filter(user=user).first()
-            if sub:
-                sub.cancel()
+    if (
+        request.method == "POST"
+        and request.POST.get("confirmation") == request.user.email
+    ):
+        if sub := Subscription.objects.filter(user=user).first():
+            sub.cancel()
 
-            # Deleting user also deletes its profile, checks, channels etc.
-            user.delete()
+        # Deleting user also deletes its profile, checks, channels etc.
+        user.delete()
 
-            request.session.flush()
-            return redirect("hc-index")
+        request.session.flush()
+        return redirect("hc-index")
 
     ctx = {}
     if "confirmation" in request.POST:

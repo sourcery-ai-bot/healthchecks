@@ -9,7 +9,7 @@ from hc.test import BaseTestCase
 class AddPushoverTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_pushover/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_pushover/"
 
     @override_settings(PUSHOVER_API_TOKEN=None)
     def test_it_requires_api_token(self):
@@ -30,7 +30,7 @@ class AddPushoverTestCase(BaseTestCase):
 
     def test_it_requires_authenticated_user(self):
         r = self.client.get(self.url)
-        self.assertRedirects(r, "/accounts/login/?next=" + self.url)
+        self.assertRedirects(r, f"/accounts/login/?next={self.url}")
 
     def test_it_adds_channel(self):
         self.client.login(username="alice@example.org", password="password")

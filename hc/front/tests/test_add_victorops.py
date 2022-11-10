@@ -6,7 +6,7 @@ from hc.test import BaseTestCase
 class AddVictorOpsTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_victorops/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_victorops/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

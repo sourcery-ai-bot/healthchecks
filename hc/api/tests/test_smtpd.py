@@ -16,7 +16,7 @@ class SmtpdTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.check = Check.objects.create(project=self.project)
-        self.email = "%s@does.not.matter" % self.check.code
+        self.email = f"{self.check.code}@does.not.matter"
 
     def test_it_works(self):
         _process_message("1.2.3.4", "foo@example.org", self.email, b"hello world")

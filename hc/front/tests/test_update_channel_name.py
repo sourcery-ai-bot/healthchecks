@@ -8,7 +8,7 @@ class UpdateChannelNameTestCase(BaseTestCase):
         self.channel = Channel(kind="email", project=self.project)
         self.channel.save()
 
-        self.url = "/integrations/%s/name/" % self.channel.code
+        self.url = f"/integrations/{self.channel.code}/name/"
 
     def test_it_works(self):
         payload = {"name": "My work email"}

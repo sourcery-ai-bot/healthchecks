@@ -50,10 +50,7 @@ class ListChecksTestCase(BaseTestCase):
         doc = r.json()
         self.assertEqual(len(doc["checks"]), 2)
 
-        by_name = {}
-        for check in doc["checks"]:
-            by_name[check["name"]] = check
-
+        by_name = {check["name"]: check for check in doc["checks"]}
         a1 = by_name["Alice 1"]
         self.assertEqual(a1["timeout"], 3600)
         self.assertEqual(a1["grace"], 900)
@@ -64,8 +61,8 @@ class ListChecksTestCase(BaseTestCase):
         self.assertEqual(a1["channels"], str(self.c1.code))
         self.assertEqual(a1["desc"], "This is description")
 
-        update_url = settings.SITE_ROOT + "/api/v1/checks/%s" % self.a1.code
-        pause_url = update_url + "/pause"
+        update_url = f"{settings.SITE_ROOT}/api/v1/checks/{self.a1.code}"
+        pause_url = f"{update_url}/pause"
         self.assertEqual(a1["update_url"], update_url)
         self.assertEqual(a1["pause_url"], pause_url)
 

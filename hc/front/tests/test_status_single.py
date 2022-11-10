@@ -8,7 +8,7 @@ class StatusSingleTestCase(BaseTestCase):
         self.check = Check(project=self.project, name="Alice Was Here")
         self.check.save()
 
-        self.url = "/checks/%s/status/" % self.check.code
+        self.url = f"/checks/{self.check.code}/status/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")
@@ -40,7 +40,7 @@ class StatusSingleTestCase(BaseTestCase):
         self.check.save()
 
         timestamp = str(p.created.timestamp())
-        url = self.url + "?u=%s" % timestamp
+        url = f"{self.url}?u={timestamp}"
 
         self.client.login(username="alice@example.org", password="password")
         r = self.client.get(url)

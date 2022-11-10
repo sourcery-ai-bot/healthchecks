@@ -7,7 +7,7 @@ from hc.test import BaseTestCase
 class AddSmsTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_sms/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_sms/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

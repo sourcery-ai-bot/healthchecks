@@ -10,7 +10,7 @@ from hc.test import BaseTestCase
 class AddMatrixTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_matrix/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_matrix/"
 
     @override_settings(MATRIX_ACCESS_TOKEN="foo")
     def test_instructions_work(self):

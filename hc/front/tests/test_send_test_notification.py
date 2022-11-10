@@ -14,7 +14,7 @@ class SendTestNotificationTestCase(BaseTestCase):
         self.channel.value = "alice@example.org"
         self.channel.save()
 
-        self.url = "/integrations/%s/test/" % self.channel.code
+        self.url = f"/integrations/{self.channel.code}/test/"
 
     def test_it_sends_test_email(self):
 

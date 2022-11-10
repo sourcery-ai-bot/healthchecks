@@ -232,12 +232,10 @@ class CheckModelTestCase(BaseTestCase):
         r = check.downtimes(10)
         self.assertEqual(len(r), 10)
         for dt, downtime, outages in r:
-            if dt.month == 11:
+            if dt.month in [11, 1]:
                 self.assertEqual(outages, 1)
             elif dt.month == 12:
                 self.assertEqual(downtime.total_seconds(), 31 * 86400)
-                self.assertEqual(outages, 1)
-            elif dt.month == 1:
                 self.assertEqual(outages, 1)
             else:
                 self.assertEqual(downtime.total_seconds(), 0)

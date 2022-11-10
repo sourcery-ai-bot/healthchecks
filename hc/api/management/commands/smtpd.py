@@ -50,7 +50,7 @@ def _process_message(remote_addr, mailfrom, mailto, data):
         elif check.subject_fail and _match(subject, check.subject_fail):
             action = "fail"
 
-    ua = "Email from %s" % mailfrom
+    ua = f"Email from {mailfrom}"
     check.ping(remote_addr, "email", "", ua, data, action)
 
     return f"Processed ping for {code}"

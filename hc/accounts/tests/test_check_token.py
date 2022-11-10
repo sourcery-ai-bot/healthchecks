@@ -9,7 +9,7 @@ class CheckTokenTestCase(BaseTestCase):
         self.profile.token = make_password("secret-token", "login")
         self.profile.save()
 
-        self.checks_url = "/projects/%s/checks/" % self.project.code
+        self.checks_url = f"/projects/{self.project.code}/checks/"
 
     def test_it_shows_form(self):
         r = self.client.get("/accounts/check_token/alice/secret-token/")
@@ -41,7 +41,7 @@ class CheckTokenTestCase(BaseTestCase):
         self.assertContains(r, "incorrect or expired")
 
     def test_it_handles_next_parameter(self):
-        url = "/accounts/check_token/alice/secret-token/?next=" + self.channels_url
+        url = f"/accounts/check_token/alice/secret-token/?next={self.channels_url}"
         r = self.client.post(url)
         self.assertRedirects(r, self.channels_url)
 

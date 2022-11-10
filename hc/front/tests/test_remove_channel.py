@@ -9,7 +9,7 @@ class RemoveChannelTestCase(BaseTestCase):
         self.channel.value = "alice@example.org"
         self.channel.save()
 
-        self.url = "/integrations/%s/remove/" % self.channel.code
+        self.url = f"/integrations/{self.channel.code}/remove/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")

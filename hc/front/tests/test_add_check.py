@@ -6,8 +6,8 @@ class AddCheckTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        self.url = "/projects/%s/checks/add/" % self.project.code
-        self.redirect_url = "/projects/%s/checks/" % self.project.code
+        self.url = f"/projects/{self.project.code}/checks/add/"
+        self.redirect_url = f"/projects/{self.project.code}/checks/"
 
     def test_it_works(self):
         self.client.login(username="alice@example.org", password="password")
@@ -16,7 +16,7 @@ class AddCheckTestCase(BaseTestCase):
         check = Check.objects.get()
         self.assertEqual(check.project, self.project)
 
-        redirect_url = "/checks/%s/details/?new" % check.code
+        redirect_url = f"/checks/{check.code}/details/?new"
         self.assertRedirects(r, redirect_url)
 
     def test_team_access_works(self):

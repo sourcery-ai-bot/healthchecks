@@ -7,7 +7,7 @@ class TransferTestCase(BaseTestCase):
         super().setUp()
 
         self.check = Check.objects.create(project=self.bobs_project)
-        self.url = "/checks/%s/transfer/" % self.check.code
+        self.url = f"/checks/{self.check.code}/transfer/"
 
     def test_it_serves_form(self):
         self.client.login(username="bob@example.org", password="password")
@@ -18,7 +18,7 @@ class TransferTestCase(BaseTestCase):
         self.client.login(username="bob@example.org", password="password")
         payload = {"project": self.project.code}
         r = self.client.post(self.url, payload, follow=True)
-        self.assertRedirects(r, "/checks/%s/details/" % self.check.code)
+        self.assertRedirects(r, f"/checks/{self.check.code}/details/")
         self.assertContains(r, "Check transferred successfully")
 
         check = Check.objects.get()

@@ -77,8 +77,8 @@ def _tags_statuses(checks):
             for tag in check.tags_list():
                 tags[tag] = "up"
 
-    tags.update(grace)
-    tags.update(down)
+    tags |= grace
+    tags |= down
     return tags, num_down
 
 
@@ -203,13 +203,7 @@ def my_checks(request, code):
             if search not in search_key:
                 hidden_checks.add(check)
 
-    # Do we need to show the "Last Duration" header?
-    show_last_duration = False
-    for check in checks:
-        if check.clamped_last_duration():
-            show_last_duration = True
-            break
-
+    show_last_duration = any(check.clamped_last_duration() for check in checks)
     ctx = {
         "page": "checks",
         "rw": rw,
@@ -332,7 +326,7 @@ def serve_doc(request, doc="introduction"):
     if not re.match(r"^[a-z_]+$", doc):
         raise Http404("not found")
 
-    path = os.path.join(settings.BASE_DIR, "templates/docs", doc + ".html")
+    path = os.path.join(settings.BASE_DIR, "templates/docs", f"{doc}.html")
     if not os.path.exists(path):
         raise Http404("not found")
 
@@ -347,9 +341,10 @@ def serve_doc(request, doc="introduction"):
             "SITE_HOSTNAME": site_hostname(),
             "SITE_SCHEME": site_scheme(),
             "PING_ENDPOINT": settings.PING_ENDPOINT,
-            "PING_URL": settings.PING_ENDPOINT + "your-uuid-here",
+            "PING_URL": f"{settings.PING_ENDPOINT}your-uuid-here",
             "IMG_URL": os.path.join(settings.STATIC_URL, "img/docs"),
         }
+
 
         for placeholder, value in replaces.items():
             content = content.replace(placeholder, value)
@@ -381,7 +376,7 @@ def add_check(request, code):
     check.assign_all_channels()
 
     url = reverse("hc-details", args=[check.code])
-    return redirect(url + "?new")
+    return redirect(f"{url}?new")
 
 
 @require_POST
@@ -474,7 +469,7 @@ def cron_preview(request):
             raise ValueError()
 
         it = croniter(schedule, now_local)
-        for i in range(0, 6):
+        for _ in range(6):
             ctx["dates"].append(it.get_next(datetime))
 
     except UnknownTimeZoneError:
@@ -652,10 +647,10 @@ def copy(request, code):
     if check.project.num_checks_available() <= 0:
         return HttpResponseBadRequest()
 
-    new_name = check.name + " (copy)"
+    new_name = f"{check.name} (copy)"
     # Make sure we don't exceed the 100 character db field limit:
     if len(new_name) > 100:
-        new_name = check.name[:90] + "... (copy)"
+        new_name = f"{check.name[:90]}... (copy)"
 
     copied = Check(project=check.project)
     copied.name = new_name
@@ -672,7 +667,7 @@ def copy(request, code):
     copied.channel_set.add(*check.channel_set.all())
 
     url = reverse("hc-details", args=[copied.code])
-    return redirect(url + "?copied")
+    return redirect(f"{url}?copied")
 
 
 @login_required
@@ -681,10 +676,7 @@ def status_single(request, code):
 
     status = check.get_status()
     events = _get_events(check, 20)
-    updated = "1"
-    if len(events):
-        updated = str(events[0].created.timestamp())
-
+    updated = str(events[0].created.timestamp()) if len(events) else "1"
     doc = {
         "status": status,
         "status_text": STATUS_TEXT_TMPL.render({"check": check, "rw": rw}),
@@ -711,19 +703,18 @@ def badges(request, code):
     sorted_tags.append("*")  # For the "overall status" badge
 
     key = project.badge_key
-    urls = []
-    for tag in sorted_tags:
-        urls.append(
-            {
-                "tag": tag,
-                "svg": get_badge_url(key, tag),
-                "svg3": get_badge_url(key, tag, with_late=True),
-                "json": get_badge_url(key, tag, fmt="json"),
-                "json3": get_badge_url(key, tag, fmt="json", with_late=True),
-                "shields": get_badge_url(key, tag, fmt="shields"),
-                "shields3": get_badge_url(key, tag, fmt="shields", with_late=True),
-            }
-        )
+    urls = [
+        {
+            "tag": tag,
+            "svg": get_badge_url(key, tag),
+            "svg3": get_badge_url(key, tag, with_late=True),
+            "json": get_badge_url(key, tag, fmt="json"),
+            "json3": get_badge_url(key, tag, fmt="json", with_late=True),
+            "shields": get_badge_url(key, tag, fmt="shields"),
+            "shields3": get_badge_url(key, tag, fmt="shields", with_late=True),
+        }
+        for tag in sorted_tags
+    ]
 
     ctx = {
         "have_tags": len(urls) > 1,
@@ -887,20 +878,16 @@ def send_test_notification(request, code):
     dummy.last_ping = timezone.now() - td(days=1)
     dummy.n_pings = 42
 
-    if channel.kind == "webhook" and not channel.url_down:
-        if channel.url_up:
-            # If we don't have url_down, but do have have url_up then
-            # send "TEST is UP" notification instead:
-            dummy.status = "up"
+    if channel.kind == "webhook" and not channel.url_down and channel.url_up:
+        # If we don't have url_down, but do have have url_up then
+        # send "TEST is UP" notification instead:
+        dummy.status = "up"
 
     # Delete all older test notifications for this channel
     Notification.objects.filter(channel=channel, owner=None).delete()
 
-    # Send the test notification
-    error = channel.notify(dummy, is_test=True)
-
-    if error:
-        messages.warning(request, "Could not send a test notification. %s" % error)
+    if error := channel.notify(dummy, is_test=True):
+        messages.warning(request, f"Could not send a test notification. {error}")
     else:
         messages.success(request, "Test notification sent!")
 
@@ -1237,7 +1224,7 @@ def add_slack_complete(request):
         messages.success(request, "The Slack integration has been added!")
     else:
         s = doc.get("error")
-        messages.warning(request, "Error message from slack: %s" % s)
+        messages.warning(request, f"Error message from slack: {s}")
 
     return redirect("hc-channels", project.code)
 
@@ -1566,8 +1553,7 @@ def telegram_help(request):
 @login_required
 def add_telegram(request):
     chat_id, chat_type, chat_name = None, None, None
-    qs = request.META["QUERY_STRING"]
-    if qs:
+    if qs := request.META["QUERY_STRING"]:
         try:
             chat_id, chat_type, chat_name = signing.loads(qs, max_age=600)
         except signing.BadSignature:
@@ -1975,8 +1961,9 @@ def add_linenotify_complete(request):
     token = doc["access_token"]
     result = requests.get(
         "https://notify-api.line.me/api/status",
-        headers={"Authorization": "Bearer %s" % token},
+        headers={"Authorization": f"Bearer {token}"},
     )
+
     doc = result.json()
 
     channel = Channel(kind="linenotify", project=project)

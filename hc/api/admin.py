@@ -51,7 +51,7 @@ class ChecksAdmin(admin.ModelAdmin):
 
         s = f'<a href="{url}"">{name}</a>'
         for tag in obj.tags_list():
-            s += " <span>%s</span>" % escape(tag)
+            s += f" <span>{escape(tag)}</span>"
 
         return s
 
@@ -140,13 +140,8 @@ class LargeTablePaginator(Paginator):
         """
         if not hasattr(self, "_count") or self._count is None:
             try:
-                estimate = 0
-                if not self.object_list.query.where:
-                    estimate = self._get_estimate()
-                if estimate < 10000:
-                    self._count = self.object_list.count()
-                else:
-                    self._count = estimate
+                estimate = 0 if self.object_list.query.where else self._get_estimate()
+                self._count = self.object_list.count() if estimate < 10000 else estimate
             except (AttributeError, TypeError):
                 # AttributeError if object_list has no count() method.
                 # TypeError if object_list.count() requires arguments
@@ -202,7 +197,7 @@ class ChannelsAdmin(admin.ModelAdmin):
         return f'<span class="ic-{ obj.kind }"></span> &nbsp; {obj.kind}{note}'
 
     def ok(self, obj):
-        return False if obj.last_error else True
+        return not obj.last_error
 
     ok.boolean = True
 

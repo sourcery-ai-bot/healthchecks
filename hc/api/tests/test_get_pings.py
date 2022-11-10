@@ -17,7 +17,7 @@ class GetPingsTestCase(BaseTestCase):
         self.a1.desc = "This is description"
         self.a1.save()
 
-        self.url = "/api/v1/checks/%s/pings/" % self.a1.code
+        self.url = f"/api/v1/checks/{self.a1.code}/pings/"
 
     def get(self, api_key="X" * 32):
         return self.client.get(self.url, HTTP_X_API_KEY=api_key)

@@ -4,22 +4,19 @@ from hc.test import BaseTestCase
 
 
 def _get_payload(**kwargs):
-    payload = {
+    return {
         "bot_email": "foo@example.org",
         "api_key": "fake-key",
         "site": "https://example.org",
         "mtype": "stream",
         "to": "general",
-    }
-
-    payload.update(kwargs)
-    return payload
+    } | kwargs
 
 
 class AddZulipTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.url = "/projects/%s/add_zulip/" % self.project.code
+        self.url = f"/projects/{self.project.code}/add_zulip/"
 
     def test_instructions_work(self):
         self.client.login(username="alice@example.org", password="password")

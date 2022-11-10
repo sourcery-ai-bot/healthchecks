@@ -24,7 +24,7 @@ class EditWebhookTestCase(BaseTestCase):
         self.channel.value = json.dumps(definition)
         self.channel.save()
 
-        self.url = "/integrations/%s/edit_webhook/" % self.channel.code
+        self.url = f"/integrations/{self.channel.code}/edit_webhook/"
 
     def test_it_shows_form(self):
         self.client.login(username="alice@example.org", password="password")

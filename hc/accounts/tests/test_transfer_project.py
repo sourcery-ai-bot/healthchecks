@@ -10,7 +10,7 @@ class TransferProjectTestCase(BaseTestCase):
 
         Check.objects.create(project=self.project)
 
-        self.url = "/projects/%s/settings/" % self.project.code
+        self.url = f"/projects/{self.project.code}/settings/"
 
     def test_transfer_project_works(self):
         self.client.login(username="alice@example.org", password="password")
@@ -25,7 +25,7 @@ class TransferProjectTestCase(BaseTestCase):
         # Bob should receive an email notification
         self.assertEqual(len(mail.outbox), 1)
         body = mail.outbox[0].body
-        self.assertTrue("/?next=" + self.url in body)
+        self.assertTrue(f"/?next={self.url}" in body)
 
     def test_transfer_project_checks_ownership(self):
         self.client.login(username="bob@example.org", password="password")

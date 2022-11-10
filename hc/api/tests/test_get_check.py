@@ -24,7 +24,7 @@ class GetCheckTestCase(BaseTestCase):
         self.a1.channel_set.add(self.c1)
 
     def get(self, code, api_key="X" * 32):
-        url = "/api/v1/checks/%s" % code
+        url = f"/api/v1/checks/{code}"
         return self.client.get(url, HTTP_X_API_KEY=api_key)
 
     def test_it_works(self):

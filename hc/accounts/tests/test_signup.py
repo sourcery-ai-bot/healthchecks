@@ -26,7 +26,7 @@ class SignupTestCase(TestCase):
 
         # And email sent
         self.assertEqual(len(mail.outbox), 1)
-        subject = "Log in to %s" % settings.SITE_NAME
+        subject = f"Log in to {settings.SITE_NAME}"
         self.assertEqual(mail.outbox[0].subject, subject)
 
         # A project should have been created

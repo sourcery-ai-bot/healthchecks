@@ -9,7 +9,7 @@ class PauseTestCase(BaseTestCase):
     def test_it_works(self):
         check = Check.objects.create(project=self.project, status="up")
 
-        url = "/api/v1/checks/%s/pause" % check.code
+        url = f"/api/v1/checks/{check.code}/pause"
         r = self.client.post(
             url, "", content_type="application/json", HTTP_X_API_KEY="X" * 32
         )
@@ -23,7 +23,7 @@ class PauseTestCase(BaseTestCase):
     def test_it_handles_options(self):
         check = Check.objects.create(project=self.project, status="up")
 
-        r = self.client.options("/api/v1/checks/%s/pause" % check.code)
+        r = self.client.options(f"/api/v1/checks/{check.code}/pause")
         self.assertEqual(r.status_code, 204)
         self.assertIn("POST", r["Access-Control-Allow-Methods"])
 
@@ -36,7 +36,7 @@ class PauseTestCase(BaseTestCase):
     def test_it_validates_ownership(self):
         check = Check.objects.create(project=self.bobs_project, status="up")
 
-        url = "/api/v1/checks/%s/pause" % check.code
+        url = f"/api/v1/checks/{check.code}/pause"
         r = self.client.post(
             url, "", content_type="application/json", HTTP_X_API_KEY="X" * 32
         )
@@ -65,7 +65,7 @@ class PauseTestCase(BaseTestCase):
         check.alert_after = check.last_start + td(hours=1)
         check.save()
 
-        url = "/api/v1/checks/%s/pause" % check.code
+        url = f"/api/v1/checks/{check.code}/pause"
         r = self.client.post(
             url, "", content_type="application/json", HTTP_X_API_KEY="X" * 32
         )

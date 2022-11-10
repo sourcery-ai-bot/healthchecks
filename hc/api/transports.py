@@ -27,7 +27,7 @@ except ImportError:
 
 
 def tmpl(template_name, **ctx):
-    template_path = "integrations/%s" % template_name
+    template_path = f"integrations/{template_name}"
     # \xa0 is non-breaking space. It causes SMS messages to use UCS2 encoding
     # and cost twice the money.
     return render_to_string(template_path, ctx).strip().replace("\xa0", " ")
@@ -71,9 +71,10 @@ class Email(Transport):
 
         headers = {
             "X-Status-Url": check.status_url,
-            "List-Unsubscribe": "<%s>" % unsub_link,
+            "List-Unsubscribe": f"<{unsub_link}>",
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         }
+
 
         from hc.accounts.models import Profile
 
@@ -122,10 +123,7 @@ class Shell(Transport):
         if check.status == "down" and not self.channel.cmd_down:
             return True
 
-        if check.status == "up" and not self.channel.cmd_up:
-            return True
-
-        return False
+        return check.status == "up" and not self.channel.cmd_up
 
     def notify(self, check):
         if not settings.SHELL_ENABLED:
@@ -162,8 +160,7 @@ class HttpTransport(Transport):
 
             r = requests.request(method, url, **options)
             if r.status_code not in (200, 201, 202, 204):
-                m = cls.get_error(r)
-                if m:
+                if m := cls.get_error(r):
                     return f'Received status code {r.status_code} with a message: "{m}"'
 
                 return f"Received status code {r.status_code}"
@@ -176,7 +173,7 @@ class HttpTransport(Transport):
 
     @classmethod
     def get(cls, url, num_tries=3, **kwargs):
-        for x in range(0, num_tries):
+        for _ in range(num_tries):
             error = cls._request("get", url, **kwargs)
             if error is None:
                 break
@@ -185,7 +182,7 @@ class HttpTransport(Transport):
 
     @classmethod
     def post(cls, url, num_tries=3, **kwargs):
-        for x in range(0, num_tries):
+        for _ in range(num_tries):
             error = cls._request("post", url, **kwargs)
             if error is None:
                 break
@@ -194,7 +191,7 @@ class HttpTransport(Transport):
 
     @classmethod
     def put(cls, url, num_tries=3, **kwargs):
-        for x in range(0, num_tries):
+        for _ in range(num_tries):
             error = cls._request("put", url, **kwargs)
             if error is None:
                 break
@@ -226,10 +223,7 @@ class Webhook(HttpTransport):
         if check.status == "down" and not self.channel.url_down:
             return True
 
-        if check.status == "up" and not self.channel.url_up:
-            return True
-
-        return False
+        return check.status == "up" and not self.channel.url_up
 
     def notify(self, check):
         if not settings.WEBHOOKS_ENABLED:
@@ -240,19 +234,16 @@ class Webhook(HttpTransport):
             return "Empty webhook URL"
 
         url = self.prepare(spec["url"], check, urlencode=True)
-        headers = {}
-        for key, value in spec["headers"].items():
-            headers[key] = self.prepare(value, check)
+        headers = {
+            key: self.prepare(value, check)
+            for key, value in spec["headers"].items()
+        }
 
         body = spec["body"]
         if body:
             body = self.prepare(body, check).encode()
 
-        num_tries = 3
-        if getattr(check, "is_test"):
-            # When sending a test notification, don't retry on failures.
-            num_tries = 1
-
+        num_tries = 1 if getattr(check, "is_test") else 3
         if spec["method"] == "GET":
             return self.get(url, num_tries=num_tries, headers=headers)
         elif spec["method"] == "POST":
@@ -293,8 +284,9 @@ class Opsgenie(HttpTransport):
 
         headers = {
             "Conent-Type": "application/json",
-            "Authorization": "GenieKey %s" % self.channel.opsgenie_key,
+            "Authorization": f"GenieKey {self.channel.opsgenie_key}",
         }
+
 
         payload = {"alias": str(check.code), "source": settings.SITE_NAME}
 
@@ -309,7 +301,7 @@ class Opsgenie(HttpTransport):
             url = "https://api.eu.opsgenie.com/v2/alerts"
 
         if check.status == "up":
-            url += "/%s/close?identifierType=alias" % check.code
+            url += f"/{check.code}/close?identifierType=alias"
 
         return self.post(url, json=payload, headers=headers)
 
@@ -434,7 +426,7 @@ class Matrix(HttpTransport):
         s = quote(self.channel.value)
 
         url = settings.MATRIX_HOMESERVER
-        url += "/_matrix/client/r0/rooms/%s/send/m.room.message?" % s
+        url += f"/_matrix/client/r0/rooms/{s}/send/m.room.message?"
         url += urlencode({"access_token": settings.MATRIX_ACCESS_TOKEN})
         return url
 
@@ -455,7 +447,7 @@ class Discord(HttpTransport):
     def notify(self, check):
         text = tmpl("slack_message.json", check=check)
         payload = json.loads(text)
-        url = self.channel.discord_webhook_url + "/slack"
+        url = f"{self.channel.discord_webhook_url}/slack"
         return self.post(url, json=payload)
 
 
@@ -559,11 +551,12 @@ class WhatsApp(HttpTransport):
         text = tmpl("whatsapp_message.html", check=check, site_name=settings.SITE_NAME)
 
         data = {
-            "From": "whatsapp:%s" % settings.TWILIO_FROM,
-            "To": "whatsapp:%s" % self.channel.phone_number,
+            "From": f"whatsapp:{settings.TWILIO_FROM}",
+            "To": f"whatsapp:{self.channel.phone_number}",
             "Body": text,
             "StatusCallback": check.status_url,
         }
+
 
         return self.post(url, data=data, auth=auth)
 
@@ -606,9 +599,9 @@ class Apprise(HttpTransport):
         )
 
         return (
-            "Failed"
-            if not a.notify(body=body, title=title, notify_type=notify_type)
-            else None
+            None
+            if a.notify(body=body, title=title, notify_type=notify_type)
+            else "Failed"
         )
 
 
@@ -660,7 +653,7 @@ class Zulip(HttpTransport):
         if not settings.ZULIP_ENABLED:
             return "Zulip notifications are not enabled."
 
-        url = self.channel.zulip_site + "/api/v1/messages"
+        url = f"{self.channel.zulip_site}/api/v1/messages"
         auth = (self.channel.zulip_bot_email, self.channel.zulip_api_key)
         data = {
             "type": self.channel.zulip_type,
@@ -695,8 +688,9 @@ class LineNotify(HttpTransport):
     def notify(self, check):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": "Bearer %s" % self.channel.linenotify_token,
+            "Authorization": f"Bearer {self.channel.linenotify_token}",
         }
+
         payload = {"message": tmpl("linenotify_message.html", check=check)}
         return self.post(self.URL, headers=headers, params=payload)
 

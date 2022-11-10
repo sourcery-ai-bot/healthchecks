@@ -11,7 +11,7 @@ class PingTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.check = Check.objects.create(project=self.project)
-        self.url = "/ping/%s" % self.check.code
+        self.url = f"/ping/{self.check.code}"
 
     def test_it_works(self):
         r = self.client.get(self.url)
@@ -131,7 +131,7 @@ class PingTestCase(BaseTestCase):
         self.assertTrue(self.check.has_confirmation_link)
 
     def test_fail_endpoint_works(self):
-        r = self.client.get("/ping/%s/fail" % self.check.code)
+        r = self.client.get(f"/ping/{self.check.code}/fail")
         self.assertEqual(r.status_code, 200)
 
         self.check.refresh_from_db()
@@ -150,7 +150,7 @@ class PingTestCase(BaseTestCase):
         self.check.last_ping = last_ping
         self.check.save()
 
-        r = self.client.get("/ping/%s/start" % self.check.code)
+        r = self.client.get(f"/ping/{self.check.code}/start")
         self.assertEqual(r.status_code, 200)
 
         self.check.refresh_from_db()
@@ -164,7 +164,7 @@ class PingTestCase(BaseTestCase):
         self.check.status = "paused"
         self.check.save()
 
-        r = self.client.get("/ping/%s/start" % self.check.code)
+        r = self.client.get(f"/ping/{self.check.code}/start")
         self.assertEqual(r.status_code, 200)
 
         self.check.refresh_from_db()
@@ -227,7 +227,7 @@ class PingTestCase(BaseTestCase):
         self.assertEqual(ping.kind, "ign")
 
     def test_zero_exit_status_works(self):
-        r = self.client.get("/ping/%s/0" % self.check.code)
+        r = self.client.get(f"/ping/{self.check.code}/0")
         self.assertEqual(r.status_code, 200)
 
         self.check.refresh_from_db()
@@ -238,7 +238,7 @@ class PingTestCase(BaseTestCase):
         self.assertEqual(ping.exitstatus, 0)
 
     def test_nonzero_exit_status_works(self):
-        r = self.client.get("/ping/%s/123" % self.check.code)
+        r = self.client.get(f"/ping/{self.check.code}/123")
         self.assertEqual(r.status_code, 200)
 
         self.check.refresh_from_db()

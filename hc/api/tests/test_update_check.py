@@ -12,7 +12,7 @@ class UpdateCheckTestCase(BaseTestCase):
         self.check = Check.objects.create(project=self.project)
 
     def post(self, code, data):
-        url = "/api/v1/checks/%s" % code
+        url = f"/api/v1/checks/{code}"
         return self.client.post(url, data, content_type="application/json")
 
     def test_it_works(self):
@@ -58,7 +58,7 @@ class UpdateCheckTestCase(BaseTestCase):
         self.assertEqual(self.check.alert_after, expected_aa)
 
     def test_it_handles_options(self):
-        r = self.client.options("/api/v1/checks/%s" % self.check.code)
+        r = self.client.options(f"/api/v1/checks/{self.check.code}")
         self.assertEqual(r.status_code, 204)
         self.assertIn("POST", r["Access-Control-Allow-Methods"])
 
@@ -116,7 +116,7 @@ class UpdateCheckTestCase(BaseTestCase):
 
     def test_it_sets_the_channel_only_once(self):
         channel = Channel.objects.create(project=self.project)
-        duplicates = "%s,%s" % (channel.code, channel.code)
+        duplicates = f"{channel.code},{channel.code}"
         r = self.post(self.check.code, {"api_key": "X" * 32, "channels": duplicates})
         self.assertEqual(r.status_code, 200)
 
@@ -150,8 +150,9 @@ class UpdateCheckTestCase(BaseTestCase):
         c2 = Channel.objects.create(project=self.project)
         r = self.post(
             self.check.code,
-            {"api_key": "X" * 32, "channels": "%s,%s" % (c1.code, c2.code)},
+            {"api_key": "X" * 32, "channels": f"{c1.code},{c2.code}"},
         )
+
 
         self.assertEqual(r.status_code, 200)
 
@@ -192,7 +193,7 @@ class UpdateCheckTestCase(BaseTestCase):
         r = self.post(self.check.code, {"api_key": "X" * 32, "channels": code})
 
         self.assertEqual(r.status_code, 400)
-        self.assertEqual(r.json()["error"], "invalid channel identifier: " + code)
+        self.assertEqual(r.json()["error"], f"invalid channel identifier: {code}")
 
         self.check.refresh_from_db()
         self.assertEqual(self.check.channel_set.count(), 0)
@@ -204,7 +205,7 @@ class UpdateCheckTestCase(BaseTestCase):
         r = self.post(self.check.code, {"api_key": "X" * 32, "channels": code})
 
         self.assertEqual(r.status_code, 400)
-        self.assertEqual(r.json()["error"], "invalid channel identifier: " + code)
+        self.assertEqual(r.json()["error"], f"invalid channel identifier: {code}")
 
         self.check.refresh_from_db()
         self.assertEqual(self.check.channel_set.count(), 0)
